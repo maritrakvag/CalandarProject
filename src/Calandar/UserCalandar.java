@@ -1,5 +1,5 @@
 package Calandar;
 
-public class UserCalandar {
+public class UserCalandar extends Calandar {
 
 }
