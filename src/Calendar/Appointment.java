@@ -1,4 +1,4 @@
-package Calandar;
+package Calendar;
 
 public class Appointment {
 
