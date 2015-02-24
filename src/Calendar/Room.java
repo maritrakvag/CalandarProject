@@ -22,7 +22,7 @@ public class Room {
 	}
 	
 	public boolean isAvailable(Appointment appointment) {
-		return roomCalendar.isAvailable(appointment) && capacity >= appointment.getNumberofParticipant();
+		return roomCalendar.isAvailable(appointment) && capacity >= appointment.getNumberofParticipants();
 	}
 
 }

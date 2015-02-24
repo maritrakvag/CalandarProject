@@ -1,5 +1,10 @@
 package User;
-import Calendar;
+
+import java.util.Date;
+
+import Calendar.Calendar;
+import Calendar.UserCalendar;
+
 public class User {
   
   private String username;
@@ -15,7 +20,7 @@ public class User {
     this.password = password;
     this.email = email;
     this.birthday=birthday;
-    this.userCalendar = new.UserCalendar(this);
+    this.userCalendar = new UserCalendar(this);
   }
   
   public String getUsername() {

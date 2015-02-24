@@ -1,5 +1,7 @@
 package Calendar;
 
+import User.User;
+
 public class UserCalendar extends Calendar {
   public User user;
   
