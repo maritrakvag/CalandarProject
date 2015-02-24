@@ -8,13 +8,15 @@ import Calendar.UserCalendar;
 public class User {
   
   private String username;
+  private int idUser;
   private String name;
   private String password;
   private String email;
   private Date birthday;
   private Calendar userCalendar;
   
-  public User (String username, String name, String password, String email, Date birthday){
+  public User (String username, int idUser, String name, String password, String email, Date birthday){
+    this.idUser=idUser;
     this.username = username;
     this.name = name;
     this.password = password;
@@ -25,6 +27,9 @@ public class User {
   
   public String getUsername() {
     return this.username;
+  }
+  public int getIdUser(){
+    return this.idUser;
   }
   public String getName() {
     return this.name;
@@ -39,9 +44,9 @@ public class User {
     return this.birthday;
   }
   
-  //public void setUsername(String value) {
-    //this.username = value;
-  //} ikke være mulig å endre brukernavn
+  public void setUsername(String value) {
+    this.username = value;
+  } 
   public void setName(String value) {
     this.name = value;
   }
