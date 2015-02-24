@@ -21,6 +21,10 @@ public class Room {
 		return this.roomID;
 	}
 	
+	public void addAppointment(Appointment appointment) {
+		roomCalendar.addAppointment(appointment);
+	}
+	
 	public boolean isAvailable(Appointment appointment) {
 		return roomCalendar.isAvailable(appointment) && capacity >= appointment.getNumberofParticipants();
 	}

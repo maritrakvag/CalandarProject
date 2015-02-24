@@ -75,14 +75,14 @@ public class Appointment {
 	}
 	
 	private Room bookRoom() {
-		//TODO: Finner et ledig rom til det gitte tidspunktet, skal ikke returnere null. Må legge avtalen inn i kalenderen til rommet.  
+		//TODO: Finner et ledig rom til det gitte tidspunktet, må legge avtalen inn i kalenderen til rommet. Trenger DB 
 		return null;
 	}
 	
 	public void changeRoom(Room room) {
 		if (room.isAvailable(this)) {
 			this.room = room;
-			//TODO: Setter avtalen inn i kalenderen til rommet. 
+			room.addAppointment(this);
 		}
 	}
 	
