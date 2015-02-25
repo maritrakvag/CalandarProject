@@ -1,8 +1,8 @@
-package Group;
+package group;
 
 import java.util.ArrayList;
 
-import User.User;
+import user.User;
 
 public class Group {
 	private ArrayList<User> users;

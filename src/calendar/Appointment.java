@@ -1,10 +1,11 @@
-package Calendar;
+package calendar;
+
+import group.Group;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-import Group.Group;
-import User.User;
+import user.User;
 
 public class Appointment {
 

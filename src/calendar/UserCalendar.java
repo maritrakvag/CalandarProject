@@ -1,6 +1,6 @@
-package Calendar;
+package calendar;
 
-import User.User;
+import user.User;
 
 public class UserCalendar extends Calendar {
   public User user;

@@ -1,6 +1,6 @@
-package Calendar;
+package calendar;
 
-import Group.Group;
+import group.Group;
 
 public class GroupCalendar extends Calendar {
   public Group group;

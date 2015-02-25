@@ -1,9 +1,9 @@
-package User;
+package user;
 
 import java.util.Date;
 
-import Calendar.Calendar;
-import Calendar.UserCalendar;
+import calendar.Calendar;
+import calendar.UserCalendar;
 
 public class User {
   
