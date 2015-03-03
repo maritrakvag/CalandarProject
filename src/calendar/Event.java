@@ -7,88 +7,113 @@ import java.util.Date;
 
 import user.User;
 
-public class Appointment {
+public class Event {
 
+	private int idEvent;
+	private String name;
 	private Date start;
 	private Date end;
+	private String description;
 	private Room room;
 	private User admin;
+	private boolean hasChanged;
 	private ArrayList<User> participants;
-	
-	public Appointment(Date start, Date end, User admin) {
+
+	public Event(int idEvent, String name, Date start, Date end, User admin,
+			String description, Room room) {
+		this.idEvent = idEvent;
+		this.name = name;
 		this.start = start;
 		this.end = end;
 		this.admin = admin;
-		this.room = bookRoom();
+		this.description = description;
+		this.room = room;
 		participants = new ArrayList<User>();
 		addParticipant(admin);
+		this.hasChanged = false;
 	}
-	
-	public Appointment(Date start, Date end, User admin, Room room) {
-		if (room.isAvailable(this)) {
-			this.start = start;
-			this.end = end;
-			this.admin = admin;
-			changeRoom(room); 
-			participants = new ArrayList<User>();
-			addParticipant(admin);
-		} else {
-			throw new IllegalStateException("The room is not available");
-		}
+
+	public int getIdEvent() {
+		return this.idEvent;
 	}
-	
+
+	public String getName() {
+		return this.name;
+	}
+
 	public Date getStart() {
 		return this.start;
 	}
-	
+
 	public Date getEnd() {
 		return this.end;
 	}
-	
+
+	public String getDescription() {
+		return this.description;
+	}
+
 	public Room getRoom() {
 		return this.room;
 	}
-	
+
 	public User getAdmin() {
 		return this.admin;
 	}
-	
+
+	public boolean hasChanged() {
+		return this.hasChanged;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+		this.hasChanged = true;
+	}
+
+	public void setDate(Date start, Date end) {
+		this.start = start;
+		this.end = end;
+		this.hasChanged = true;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+		this.hasChanged = true;
+	}
+
 	public boolean containsParticipant(User participant) {
 		return participants.contains(participant);
 	}
-	
+
 	public void addParticipant(User participant) {
 		if (!containsParticipant(participant)) {
 			participants.add(participant);
 		}
 	}
-	
+
 	public void deleteParticipant(User participant) {
 		if (containsParticipant(participant)) {
 			participants.remove(participant);
 		}
 	}
-	
+
 	public void addGroup(Group group) {
 		for (User user : group.getMembers()) {
 			addParticipant(user);
 		}
 	}
-	
-	private Room bookRoom() {
-		//TODO: Finner et ledig rom til det gitte tidspunktet, må legge avtalen inn i kalenderen til rommet. Trenger DB 
-		return null;
-	}
-	
+
 	public void changeRoom(Room room) {
-		if (room.isAvailable(this)) {
+		if (room.isAvailable(this)
+				&& room.getCapacity() >= getNumberofParticipants()) {
 			this.room = room;
 			room.addAppointment(this);
+			this.hasChanged = true;
 		}
 	}
-	
+
 	public int getNumberofParticipants() {
 		return this.participants.size();
 	}
-	
+
 }

@@ -1,63 +1,69 @@
 package user;
 
-import java.util.Date;
-
 import calendar.Calendar;
+import calendar.Event;
 import calendar.UserCalendar;
 
 public class User {
   
   private String username;
-  private int idUser;
-  private String name;
+  private String firstname;
+  private String lastname;
   private String password;
   private String email;
-  private Date birthday;
   private Calendar userCalendar;
   
-  public User (String username, int idUser, String name, String password, String email, Date birthday){
-    this.idUser=idUser;
+  public User (String username, String firstname, String lastname,  String email, String password){
     this.username = username;
-    this.name = name;
+    this.firstname = firstname;
+    this.lastname = lastname;
     this.password = password;
     this.email = email;
-    this.birthday=birthday;
     this.userCalendar = new UserCalendar(this);
   }
   
   public String getUsername() {
     return this.username;
   }
-  public int getIdUser(){
-    return this.idUser;
-  }
+
   public String getName() {
-    return this.name;
+    return this.firstname + " " + this.lastname;
   }
+  
+  public String getFirstName() {
+	  return this.firstname;
+  }
+  
+  public String getLastName() {
+	  return this.lastname;
+  }
+  
   public String getPassword() {
     return this.password;
   }
+  
   public String getEmail() {
     return this.email;
   }
-  public Date getBirthday() {
-    return this.birthday;
+
+  public void setFirstName(String firstname) {
+	  this.firstname = firstname;
   }
   
-  public void setUsername(String value) {
-    this.username = value;
-  } 
-  public void setName(String value) {
-    this.name = value;
+  public void setLastName(String lastname) {
+	  this.lastname = lastname;
   }
+  
   public void setPassword(String value) {
     this.password = value;
   }
+  
   public void setEmail(String value) {
     this.email = value;
   }
-  public void setBirthday(Date value) {
-    this.birthday = value;
+
+  public boolean isAvailable(Event event) {
+	  return userCalendar.isAvailable(event);
   }
 
 }

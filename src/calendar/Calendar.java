@@ -4,36 +4,36 @@ import java.util.ArrayList;
 
 public class Calendar {
 	
-	private ArrayList<Appointment> appointments;
+	private ArrayList<Event> events;
 	
 	public Calendar() {
-		this.appointments = new ArrayList<Appointment>();
+		this.events = new ArrayList<Event>();
 	}
 	
-	public void deleteAppointment(Appointment appointment) {
-		if (containsAppointment(appointment)) {
-			this.appointments.remove(appointment);
+	public void deleteEvent(Event event) {
+		if (containsEvent(event)) {
+			this.events.remove(event);
 		} else {
-			throw new IllegalArgumentException("The appointment doesn't exist in this calendar.");
+			throw new IllegalArgumentException("The event doesn't exist in this calendar.");
 		}
 	}
 	
-	public void addAppointment(Appointment appointment) {
-		if (isAvailable(appointment)) {
-			this.appointments.add(appointment);
+	public void addEvent(Event event) {
+		if (isAvailable(event)) {
+			this.events.add(event);
 		} else {
-			throw new IllegalStateException("this calendar isn't available for this appointment");
+			throw new IllegalStateException("this calendar isn't available for this event");
 		}
 	}
 	
-	public boolean containsAppointment(Appointment appointment) {
-		return appointments.contains(appointment);
+	public boolean containsEvent(Event event) {
+		return events.contains(event);
 	}
 	
 	//Sjekker om kalenderen er ledig til det tidspunktet avtalen(input) har. 
-	public boolean isAvailable(Appointment app1) {
-		for (Appointment app2 : appointments) {
-			if (overlaps(app1,app2)) {
+	public boolean isAvailable(Event event1) {
+		for (Event event2 : events) {
+			if (overlaps(event1,event2)) {
 				return false;
 			}
 		}
@@ -41,8 +41,8 @@ public class Calendar {
 	}
 	
 	//Sjekker om de to avtalene overlapper, (StartDate1 <= EndDate2) and (StartDate2 <= EndDate1)
-	private boolean overlaps(Appointment app1, Appointment app2) {
-		if (app1.getStart().before(app2.getEnd()) && app2.getStart().before(app1.getEnd())) {
+	private boolean overlaps(Event event1, Event event2) {
+		if (event1.getStart().before(event2.getEnd()) && event2.getStart().before(event1.getEnd())) {
 			return true;
 		} else {
 			return false;

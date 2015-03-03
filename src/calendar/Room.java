@@ -1,32 +1,32 @@
 package calendar;
 
-
 public class Room {
-	
+
 	private String roomID;
 	private Calendar roomCalendar;
 	private int capacity;
-	
+
 	public Room(String roomID, int capacity) {
-		if (roomID.length() == 4 && capacity > 0) {
-			this.roomID = roomID;
-			this.capacity = capacity;
-			this.roomCalendar = new Calendar();
-		} else {
-			throw new IllegalArgumentException("RoomID must be four characters and the capacity must be greater than 0");
-		}
+		this.roomID = roomID;
+		this.capacity = capacity;
+		this.roomCalendar = new Calendar();
 	}
-	
+
 	public String getRoomID() {
 		return this.roomID;
 	}
-	
-	public void addAppointment(Appointment appointment) {
-		roomCalendar.addAppointment(appointment);
+
+	public int getCapacity() {
+		return this.capacity;
 	}
-	
-	public boolean isAvailable(Appointment appointment) {
-		return roomCalendar.isAvailable(appointment) && capacity >= appointment.getNumberofParticipants();
+
+	public void addAppointment(Event event) {
+		roomCalendar.addEvent(event);
+	}
+
+	public boolean isAvailable(Event event) {
+		return roomCalendar.isAvailable(event)
+				&& capacity >= event.getNumberofParticipants();
 	}
 
 }
