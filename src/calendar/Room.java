@@ -20,13 +20,18 @@ public class Room {
 		return this.capacity;
 	}
 
-	public void addAppointment(Event event) {
+	public void addEvent(Event event) {
 		roomCalendar.addEvent(event);
+	}
+	
+	public void removeEvent(Event event) {
+		roomCalendar.deleteEvent(event);
 	}
 
 	public boolean isAvailable(Event event) {
 		return roomCalendar.isAvailable(event)
 				&& capacity >= event.getNumberofParticipants();
 	}
+
 
 }

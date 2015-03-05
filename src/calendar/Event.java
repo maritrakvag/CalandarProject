@@ -60,6 +60,10 @@ public class Event {
 	public User getAdmin() {
 		return this.admin;
 	}
+	
+	public ArrayList<User> getParticipants() {
+		return this.participants;
+	}
 
 	public boolean hasChanged() {
 		return this.hasChanged;
@@ -70,6 +74,11 @@ public class Event {
 		this.hasChanged = true;
 	}
 
+	public void setRoom(Room room) {
+		this.room = room;
+		room.addEvent(this);
+	}
+	
 	public void setDate(Date start, Date end) {
 		this.start = start;
 		this.end = end;
@@ -106,8 +115,9 @@ public class Event {
 	public void changeRoom(Room room) {
 		if (room.isAvailable(this)
 				&& room.getCapacity() >= getNumberofParticipants()) {
+			this.room.removeEvent(this);
 			this.room = room;
-			room.addAppointment(this);
+			room.addEvent(this);
 			this.hasChanged = true;
 		}
 	}
