@@ -17,6 +17,7 @@ public class Program {
 	public static ArrayList<User> users;
 	public static ArrayList<Event> events;
 	public static ArrayList<Group> groups;
+	private user admin;
 	private DatabaseConnection dbc;
 	private Scanner sc;
 
@@ -155,6 +156,7 @@ public class Program {
 	public boolean login(String username, String password){
 		for (user:program.users){
 			if(user.getUsername().equals(username) && user.getPassword().equals(password)){
+				this.admin=user;
 				return true;
 			}
 			
