@@ -17,7 +17,7 @@ public class Program {
 	public static ArrayList<User> users;
 	public static ArrayList<Event> events;
 	public static ArrayList<Group> groups;
-	private user admin;
+	private User admin;
 	private DatabaseConnection dbc;
 	private Scanner sc;
 
@@ -46,7 +46,7 @@ public class Program {
 	}
 
 	public int printMenu() {
-		System.out.println("Menu \n1. Add user \n2. Add group \n3. Exit");
+		System.out.println("Menu \n1. Add event \n2. Add group \n3. Exit");
 		int n = sc.nextInt();
 		return n;
 	}
@@ -126,10 +126,28 @@ public class Program {
 		User user = new User(username, firstname, lastname, password, mail);
 		addUser(user);
 	}
+	public void printAddEvent(){
+		System.out.println("Name:");
+		String name=sc.nextLine();
+		System.out.println("Description:");
+		String description=sc.nextLine();
+		int idEvent=0;
+		for (int i = 1; i <= Program.events.size(); i++) {
+			for (Event event : Program.events) {
+				if (event.getIdEvent() == i) {
+					break;
+				}
+			}
+			idEvent = i;
+		}
+		if (idEvent == 0) {
+			idEvent = Program.groups.size() + 1;
+	}
 
 	private void addUser(User user) {
 		Program.users.add(user);
 		dbc.addUser(user);
+		getUsernamePassword();
 	}
 
 	private boolean isValidUsername(String username) {
@@ -168,7 +186,7 @@ public class Program {
 		while (true) {
 			int n = printMenu();
 			if (n == 1) {
-				printAddUser();
+				printAddEvent();
 			} else if (n == 2) {
 				printAddGroup();
 			} else if (n == 3) {
