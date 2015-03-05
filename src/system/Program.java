@@ -3,7 +3,6 @@ package system;
 import group.Group;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 
 import user.User;
@@ -47,12 +46,18 @@ public class Program {
 			}
 		}
 	}
+	
+	
 
 	public void printAddGroup() {
-		// String blæ = sc.nextLine();
+		sc.nextLine();
 		System.out.println("Group name:");
 		String groupName = sc.nextLine();
-		int idGroup = 0;
+		
+		int idGroup = Program.groups.size() + 1;
+		
+		//Dette funker ikke.. 
+	/*	int idGroup = 0;
 		for (int i = 1; i <= Program.groups.size(); i++) {
 			for (Group group : Program.groups) {
 				if (group.getIdGroup() == i) {
@@ -63,12 +68,14 @@ public class Program {
 		}
 		if (idGroup == 0) {
 			idGroup = Program.groups.size() + 1;
-		}
+		}*/
 		Group group = new Group(idGroup, groupName);
 		while (true) {
 			System.out.println("1.Legg til medlem \n2. Lag gruppe");
+			//sc.nextLine();
 			int option = sc.nextInt();
 			if (option == 1) {
+				sc.nextLine();
 				System.out.println("Username: ");
 				String username = sc.nextLine();
 				User groupMember = null;
@@ -84,7 +91,7 @@ public class Program {
 					group.addMember(groupMember);
 				}
 			} else {
-				Program.groups.add(group);
+				addGroup(group);
 				return;
 			}
 		}
@@ -96,7 +103,7 @@ public class Program {
 	}
 
 	public void printAddUser() {
-		String blæ = sc.nextLine();
+		sc.nextLine();
 		System.out.println("Username:");
 		String username = sc.nextLine();
 		if (!isValidUsername(username)) {

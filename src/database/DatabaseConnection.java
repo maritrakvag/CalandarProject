@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 
 import calendar.Event;
 import calendar.Room;
@@ -28,22 +29,64 @@ public class DatabaseConnection {
 		}
 	}
 	
+	public void addEvent(Event event) {
+		try {
+			int idEvent = event.getIdEvent();
+			String name = event.getName();
+			Date start = event.getStart();
+			Date end = event.getEnd();
+			User admin = event.getAdmin();
+			String description = event.getDescription();
+			boolean hasChanged = event.hasChanged();
+			
+			String query = "insert into event"
+					+ " (idEvent, name, startTime, endTime, description, admin, hasChanged)"
+					+ " values ('" + idEvent + "','" + name + "','" + start + "','" + end + "','" + admin +"','" + description + "','" + hasChanged +"')";
+			
+			stat.executeQuery(query);
+			
+			Room room = event.getRoom();
+			
+			String query2 = "insert into bookedfor" 
+						+ "(room,event)" 
+						+ " values ('" + room + "','"  + idEvent +"')";
+			
+			Statement stat2 = conn.createStatement();
+			stat2.executeQuery(query2);
+			
+			for (User user : event.getParticipants()) {
+				String username = user.getUsername();
+				
+				String query3 = "insert into invitedto" 
+						+ "(event,user,status,seenChange)" 
+						+ " values ('" + idEvent + "','"  + username + "',"  + 0 + ","  + 0 + ")";
+			
+				Statement stat3 = conn.createStatement();
+				stat3.executeQuery(query3);
+			}
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void addGroup(Group group) {
 		try {
 			int idGroup = group.getIdGroup();
 			String name = group.getName();
-			String query = "insert into group"
-					+ " ( idGroup, name)"
+			String query = "insert into groups"
+					+ " (idGroup, name)"
 					+ " values ('" + idGroup + "','" + name +"')";
 			stat.executeUpdate(query);
 			
-			ArrayList<User> groupMembers = group.getMembers();
-			for (User user : groupMembers) {
+			for (User user : group.getMembers()) {
 				String username = user.getUsername();
 				String query2 = "insert into user_has_group"
 						+ " ( User_username, Group_idGroup)"
 						+ " values ('" + username + "','" + idGroup +"')";
-				stat.executeUpdate(query2);
+				Statement st = conn.createStatement();
+				st.executeUpdate(query2);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
