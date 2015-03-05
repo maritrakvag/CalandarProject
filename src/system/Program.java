@@ -49,7 +49,7 @@ public class Program {
 	}
 
 	public void printAddGroup() {
-		// String blæ = sc.nextLine();
+		// String blÃ¦ = sc.nextLine();
 		System.out.println("Group name:");
 		String groupName = sc.nextLine();
 		int idGroup = 0;
@@ -96,7 +96,7 @@ public class Program {
 	}
 
 	public void printAddUser() {
-		String blæ = sc.nextLine();
+		String blÃ¦ = sc.nextLine();
 		System.out.println("Username:");
 		String username = sc.nextLine();
 		if (!isValidUsername(username)) {
@@ -129,6 +129,26 @@ public class Program {
 			}
 		}
 		return true;
+	}
+	public void getUsernamePassword(){
+		String username = sc.nextline();
+		String password=sc.nextline();
+		login(username,password);
+		if (login(username,password)){
+			System.out.println("You are now logged in");
+		}
+		else{
+			System.out.println("The username or password is incorrect");	
+	}
+	
+	public boolean login(String username, String password){
+		for (user:program.users){
+			if(user.getUsername().equals(username) && user.getPassword().equals(password)){
+				return true;
+			}
+			
+		}
+		return false;
 	}
 
 	public void run() {
