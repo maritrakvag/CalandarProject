@@ -31,6 +31,17 @@ public class Program {
 		users = dbc.initUsers();
 		events = dbc.initEvents();
 		groups = dbc.initGroups();
+		System.out.print("Do you want to \n1.Log in \n2.Add user")
+		int inp=sc.nextInt();
+		if(inp == 1){
+			getUsernamePassword();
+		}
+		else if(inp == 2){
+			printAddUser();
+		}
+		else{
+			System.out.print("You have to choose 1 or 2");
+		}
 	}
 
 	public int printMenu() {
