@@ -19,8 +19,7 @@ public class Event {
 	private boolean hasChanged;
 	private ArrayList<User> participants;
 
-	public Event(int idEvent, String name, Date start, Date end, User admin,
-			String description, Room room) {
+	public Event(int idEvent, String name, Date start, Date end, User admin, String description, Room room) {
 		this.idEvent = idEvent;
 		this.name = name;
 		this.start = start;
@@ -97,12 +96,14 @@ public class Event {
 	public void addParticipant(User participant) {
 		if (!containsParticipant(participant)) {
 			participants.add(participant);
+			participant.getUserCalendar().addEvent(this);
 		}
 	}
 
 	public void deleteParticipant(User participant) {
 		if (containsParticipant(participant)) {
 			participants.remove(participant);
+			participant.getUserCalendar().deleteEvent(this);
 		}
 	}
 

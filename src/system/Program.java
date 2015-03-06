@@ -2,7 +2,10 @@ package system;
 
 import group.Group;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 import user.User;
@@ -16,13 +19,13 @@ public class Program {
 	public static ArrayList<User> users;
 	public static ArrayList<Event> events;
 	public static ArrayList<Group> groups;
+	private User admin;
 	private DatabaseConnection dbc;
 	private Scanner sc;
 
 	public Program() {
 		sc = new Scanner(System.in);
-		dbc = new DatabaseConnection(
-				"jdbc:mysql://localhost:3306/calendarsystem", "root", "passord");
+		dbc = new DatabaseConnection("jdbc:mysql://localhost:3306/calendarsystem", "root", "passord");
 	}
 
 	public void init() {
@@ -32,25 +35,9 @@ public class Program {
 		groups = dbc.initGroups();
 	}
 
-	public int printMenu() {
-		System.out.println("Menu \n1. Add user \n2. Add group \n3. Exit");
-		int n = sc.nextInt();
-		return n;
-	}
-
-	public void bookRoom(Event event) {
-		for (Room room : Program.rooms) {
-			if (room.isAvailable(event)
-					&& room.getCapacity() >= event.getNumberofParticipants()) {
-				event.setRoom(room);
-			}
-		}
-	}
-	
-	
-
 	public void printAddGroup() {
 		sc.nextLine();
+		
 		System.out.println("Group name:");
 		String groupName = sc.nextLine();
 		
@@ -69,10 +56,10 @@ public class Program {
 		if (idGroup == 0) {
 			idGroup = Program.groups.size() + 1;
 		}*/
+		
 		Group group = new Group(idGroup, groupName);
 		while (true) {
 			System.out.println("1.Legg til medlem \n2. Lag gruppe");
-			//sc.nextLine();
 			int option = sc.nextInt();
 			if (option == 1) {
 				sc.nextLine();
@@ -97,11 +84,88 @@ public class Program {
 		}
 	}
 
-	public void addGroup(Group group) {
+	private void addGroup(Group group) {
 		Program.groups.add(group);
 		dbc.addGroup(group);
 	}
 
+	public void printAddEvent(){
+		sc.nextLine();
+		System.out.println("Name:");
+		String name=sc.nextLine();
+		System.out.println("Description:");
+		String description=sc.nextLine();
+		int idEvent = Program.events.size() + 1;
+		
+		System.out.println("Start: dd.MM.yyyy,hh:mm");
+		String start = sc.nextLine();
+		
+		System.out.println("End: dd.MM.yyyy,hh:mm");
+		String end = sc.nextLine();
+		
+		Date startDate = string2date(start);
+		Date endDate = string2date(end);
+		
+		Event event = new Event(idEvent,name,startDate,endDate,this.admin,description,null);
+		
+		while(true) {
+			System.out.println("1.Add participants \n2.Finish");
+			int option = sc.nextInt();
+			if (option == 1) {
+				System.out.println("Username: ");
+				String username = sc.nextLine();
+				User participant = null;
+				for (User user : Program.users) {
+					if (user.getUsername().equals(username)) {
+						participant = user;
+						break;
+					}
+				}
+				if (participant == null) {
+					System.out.println("the user was not found");
+				} else {
+					event.addParticipant(participant);
+				}
+			} else {
+				break;
+			}
+		}
+		
+		if (!bookRoom(event)) {
+			System.out.println("No available rooms");
+			return;
+		}
+		
+		addEvent(event);
+	}
+
+	private void addEvent(Event event) {
+		Program.events.add(event);
+		dbc.addEvent(event);
+	}
+	
+	private boolean bookRoom(Event event) {
+		for (Room room : Program.rooms) {
+			if (room.isAvailable(event)
+					&& room.getCapacity() >= event.getNumberofParticipants()) {
+				event.setRoom(room);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private Date string2date(String stringDate)  {
+		Date date = null;
+		try {
+	      SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy,hh:mm");
+	      date = ft.parse(stringDate);
+		} catch (ParseException e){
+			e.printStackTrace();
+		}
+		return date;
+	}
+	
 	public void printAddUser() {
 		sc.nextLine();
 		System.out.println("Username:");
@@ -125,6 +189,7 @@ public class Program {
 	private void addUser(User user) {
 		Program.users.add(user);
 		dbc.addUser(user);
+		getUsernamePassword();
 	}
 
 	private boolean isValidUsername(String username) {
@@ -137,12 +202,63 @@ public class Program {
 		}
 		return true;
 	}
+	
+	public void printLogin() {
+		
+		System.out.println("Do you want to \n1.Log in \n2.Add user");
+		int inp=sc.nextInt();
+		if(inp == 1){
+			getUsernamePassword();
+		}
+		else if(inp == 2){
+			printAddUser();
+			printLogin();
+		}
+		else{
+			System.out.print("You have to choose 1 or 2");
+		}
+	}
+	
+	public void getUsernamePassword(){
+		sc.nextLine();
+		System.out.println("Username: ");
+		String username = sc.nextLine();
+		System.out.println("Password: ");
+		String password=  sc.nextLine();
+		boolean login = login(username,password);
+		if (login){
+			System.out.println("You are now logged in");
+		}
+		else{
+			System.out.println("The username or password is incorrect");
+			printLogin();
+			
+		}
+	}
+	
+	private boolean login(String username, String password){
+		for (User user : Program.users){
+			if(user.getUsername().equals(username) && user.getPassword().equals(password)){
+				this.admin=user;
+				return true;
+			}
+			
+			
+		}
+		return false;
+	}
+
+	public int printMenu() {
+		System.out.println("Menu \n1. Add event \n2. Add group \n3. Exit");
+		int n = sc.nextInt();
+		return n;
+	}
 
 	public void run() {
 		while (true) {
 			int n = printMenu();
 			if (n == 1) {
-				printAddUser();
+				printAddEvent();
 			} else if (n == 2) {
 				printAddGroup();
 			} else if (n == 3) {
@@ -154,6 +270,7 @@ public class Program {
 	public static void main(String[] args) {
 		Program p = new Program();
 		p.init();
+		p.printLogin();
 		p.run();
 
 		/*

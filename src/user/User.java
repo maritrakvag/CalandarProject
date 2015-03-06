@@ -25,6 +25,10 @@ public class User {
   public String getUsername() {
     return this.username;
   }
+  
+  public Calendar getUserCalendar() {
+	  return this.userCalendar;
+  }
 
   public String getName() {
     return this.firstname + " " + this.lastname;
