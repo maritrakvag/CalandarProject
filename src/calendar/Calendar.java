@@ -19,11 +19,8 @@ public class Calendar {
 	}
 	
 	public void addEvent(Event event) {
-		if (isAvailable(event)) {
-			this.events.add(event);
-		} else {
-			throw new IllegalStateException("this calendar isn't available for this event");
-		}
+		this.events.add(event);
+
 	}
 	
 	public boolean containsEvent(Event event) {

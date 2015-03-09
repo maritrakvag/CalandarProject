@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -29,30 +31,33 @@ public class DatabaseConnection {
 		}
 	}
 	
-	public void addEvent(Event event) {
+	public void addEvent(Event event,String start, String end) {
 		try {
 			int idEvent = event.getIdEvent();
 			String name = event.getName();
-			Date start = event.getStart();
-			Date end = event.getEnd();
-			User admin = event.getAdmin();
+			String admin = event.getAdmin().getUsername();
 			String description = event.getDescription();
-			boolean hasChanged = event.hasChanged();
+			String place = event.getPlace();
+	
+			System.out.println(idEvent + name + start + end + admin + description + place);
 			
 			String query = "insert into event"
-					+ " (idEvent, name, startTime, endTime, description, admin, hasChanged)"
-					+ " values ('" + idEvent + "','" + name + "','" + start + "','" + end + "','" + admin +"','" + description + "','" + hasChanged +"')";
+					+ " (idEvent, name, startTime, endTime, description, admin, hasChanged, place)"
+					+ " values (" + idEvent + ",'" + name + "','" + start + "','" + end + "','" + admin +"','" + description + "'," + 0 + ",'" + place +  "')";
 			
 			stat.executeQuery(query);
 			
 			Room room = event.getRoom();
 			
-			String query2 = "insert into bookedfor" 
+			if (room != null) {
+				
+				String query2 = "insert into bookedfor" 
 						+ "(room,event)" 
 						+ " values ('" + room + "','"  + idEvent +"')";
-			
-			Statement stat2 = conn.createStatement();
-			stat2.executeQuery(query2);
+				
+				Statement stat2 = conn.createStatement();
+				stat2.executeQuery(query2);
+			}
 			
 			for (User user : event.getParticipants()) {
 				String username = user.getUsername();
@@ -172,11 +177,22 @@ public class DatabaseConnection {
 		}
 		return groups;
 	}
+	
+	private Date string2date(String stringDate)  {
+		java.util.Date date = null;
+		try {
+	      SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+	      date = ft.parse(stringDate);
+		} catch (ParseException e){
+			e.printStackTrace();
+		}
+		return date;
+	}
 
 	public ArrayList<Event> initEvents() {
 		ArrayList<Event> events = new ArrayList<Event>();
 		try {
-			String queryEvent = "select idEvent, name, startTime, endTime, description, admin, idRoom from event, room, BookedFor where event.idEvent=bookedfor.event and room.idroom=bookedfor.room";
+			String queryEvent = "select idEvent, name, startTime, endTime, description, admin, place, idRoom from event, room, BookedFor where event.idEvent=bookedfor.event and room.idroom=bookedfor.room";
 
 			ResultSet rse = stat.executeQuery(queryEvent);
 
@@ -196,10 +212,13 @@ public class DatabaseConnection {
 					}
 				}
 				
+				Date start = string2date(rse.getString("startTime"));
+				Date end = string2date(rse.getString("endTime"));
+				
 				Event event = new Event(rse.getInt("idEvent"),
-						rse.getString("name"), rse.getDate("startTime"),
-						rse.getDate("endTime"), admin,
-						rse.getString("description"), eventRoom);
+						rse.getString("name"), start,
+						end, admin,
+						rse.getString("description"),rse.getString("place"), eventRoom);
 				
 				eventRoom.addEvent(event);
 

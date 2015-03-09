@@ -36,13 +36,9 @@ public class Program {
 	}
 
 	public void printAddGroup() {
-		sc.nextLine();
-		
 		System.out.println("Group name:");
 		String groupName = sc.nextLine();
-		
 		int idGroup = Program.groups.size() + 1;
-		
 		//Dette funker ikke.. 
 	/*	int idGroup = 0;
 		for (int i = 1; i <= Program.groups.size(); i++) {
@@ -56,13 +52,13 @@ public class Program {
 		if (idGroup == 0) {
 			idGroup = Program.groups.size() + 1;
 		}*/
-		
 		Group group = new Group(idGroup, groupName);
+		group.addMember(admin);
 		while (true) {
 			System.out.println("1.Legg til medlem \n2. Lag gruppe");
 			int option = sc.nextInt();
+			sc.nextLine();
 			if (option == 1) {
-				sc.nextLine();
 				System.out.println("Username: ");
 				String username = sc.nextLine();
 				User groupMember = null;
@@ -90,27 +86,30 @@ public class Program {
 	}
 
 	public void printAddEvent(){
-		sc.nextLine();
 		System.out.println("Name:");
 		String name=sc.nextLine();
 		System.out.println("Description:");
 		String description=sc.nextLine();
 		int idEvent = Program.events.size() + 1;
 		
-		System.out.println("Start: dd.MM.yyyy,hh:mm");
+		System.out.println("Start: YYYY-MM-DD hh:mm");
 		String start = sc.nextLine();
 		
-		System.out.println("End: dd.MM.yyyy,hh:mm");
+		System.out.println("End: YYYY-MM-DD hh:mm");
 		String end = sc.nextLine();
 		
 		Date startDate = string2date(start);
 		Date endDate = string2date(end);
 		
-		Event event = new Event(idEvent,name,startDate,endDate,this.admin,description,null);
+		System.out.println("Place: ");
+		String place = sc.nextLine() ;
+		
+		Event event = new Event(idEvent,name,startDate,endDate,this.admin,description,place,null);
 		
 		while(true) {
 			System.out.println("1.Add participants \n2.Finish");
 			int option = sc.nextInt();
+			sc.nextLine();
 			if (option == 1) {
 				System.out.println("Username: ");
 				String username = sc.nextLine();
@@ -131,17 +130,24 @@ public class Program {
 			}
 		}
 		
-		if (!bookRoom(event)) {
-			System.out.println("No available rooms");
-			return;
-		}
+		System.out.println("Book room? \n1. Yes \n2.No");
+		int input = sc.nextInt();
+		sc.nextLine();
 		
-		addEvent(event);
+		if (input == 1) {
+			boolean room = bookRoom(event);
+			
+			if (!room) {
+				System.out.println("No available rooms");
+				return;
+			}
+		}
+		addEvent(event,start,end);
 	}
 
-	private void addEvent(Event event) {
+	private void addEvent(Event event,String start, String end) {
 		Program.events.add(event);
-		dbc.addEvent(event);
+		dbc.addEvent(event,start,end);
 	}
 	
 	private boolean bookRoom(Event event) {
@@ -156,9 +162,9 @@ public class Program {
 	}
 	
 	private Date string2date(String stringDate)  {
-		Date date = null;
+		java.util.Date date = null;
 		try {
-	      SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy,hh:mm");
+	      SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 	      date = ft.parse(stringDate);
 		} catch (ParseException e){
 			e.printStackTrace();
@@ -167,7 +173,6 @@ public class Program {
 	}
 	
 	public void printAddUser() {
-		sc.nextLine();
 		System.out.println("Username:");
 		String username = sc.nextLine();
 		if (!isValidUsername(username)) {
@@ -182,14 +187,13 @@ public class Program {
 		String password = sc.nextLine();
 		System.out.println("Mail:");
 		String mail = sc.nextLine();
-		User user = new User(username, firstname, lastname, password, mail);
+		User user = new User(username, firstname, lastname, mail, password);
 		addUser(user);
 	}
 
 	private void addUser(User user) {
 		Program.users.add(user);
 		dbc.addUser(user);
-		getUsernamePassword();
 	}
 
 	private boolean isValidUsername(String username) {
@@ -202,25 +206,8 @@ public class Program {
 		}
 		return true;
 	}
-	
-	public void printLogin() {
-		
-		System.out.println("Do you want to \n1.Log in \n2.Add user");
-		int inp=sc.nextInt();
-		if(inp == 1){
-			getUsernamePassword();
-		}
-		else if(inp == 2){
-			printAddUser();
-			printLogin();
-		}
-		else{
-			System.out.print("You have to choose 1 or 2");
-		}
-	}
-	
+
 	public void getUsernamePassword(){
-		sc.nextLine();
 		System.out.println("Username: ");
 		String username = sc.nextLine();
 		System.out.println("Password: ");
@@ -231,8 +218,7 @@ public class Program {
 		}
 		else{
 			System.out.println("The username or password is incorrect");
-			printLogin();
-			
+			getUsernamePassword();
 		}
 	}
 	
@@ -242,18 +228,35 @@ public class Program {
 				this.admin=user;
 				return true;
 			}
-			
-			
 		}
 		return false;
 	}
 
+	public void printLogin() {
+		while (true) {
+			System.out.println("Do you want to \n1.Log in \n2.Add user");
+			int inp=sc.nextInt();
+			sc.nextLine();
+			if(inp == 1){
+				getUsernamePassword();
+				return;
+			}
+			else if(inp == 2){
+				printAddUser();
+			}
+			else{
+				System.out.print("You have to choose 1 or 2");
+			}
+		}
+	}
+	
 	public int printMenu() {
 		System.out.println("Menu \n1. Add event \n2. Add group \n3. Exit");
 		int n = sc.nextInt();
+		sc.nextLine();
 		return n;
 	}
-
+	
 	public void run() {
 		while (true) {
 			int n = printMenu();
@@ -272,25 +275,6 @@ public class Program {
 		p.init();
 		p.printLogin();
 		p.run();
-
-		/*
-		 * Program p = new Program(); p.init();
-		 * 
-		 * 
-		 * for (User user : Program.users) { System.out.println(user.getName());
-		 * }
-		 * 
-		 * for (Room room : Program.rooms) {
-		 * System.out.println(room.getRoomID()); }
-		 * 
-		 * for (Event event : Program.events) {
-		 * System.out.println(event.getName()); for (User user :
-		 * event.getParticipants()) { System.out.println(user.getName()); } }
-		 * 
-		 * for (Group group : Program.groups) {
-		 * System.out.println(group.getName()); for (User user :
-		 * group.getMembers()) { System.out.println(user.getName()); } }
-		 */
 	}
 
 }

@@ -69,5 +69,9 @@ public class User {
   public boolean isAvailable(Event event) {
 	  return userCalendar.isAvailable(event);
   }
+  
+  public String toString() {
+	  return this.username + this.firstname + this.lastname + this.email + this.password;
+  }
 
 }

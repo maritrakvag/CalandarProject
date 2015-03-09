@@ -17,9 +17,10 @@ public class Event {
 	private Room room;
 	private User admin;
 	private boolean hasChanged;
+	private String place;
 	private ArrayList<User> participants;
 
-	public Event(int idEvent, String name, Date start, Date end, User admin, String description, Room room) {
+	public Event(int idEvent, String name, Date start, Date end, User admin, String description, String place,  Room room) {
 		this.idEvent = idEvent;
 		this.name = name;
 		this.start = start;
@@ -27,6 +28,7 @@ public class Event {
 		this.admin = admin;
 		this.description = description;
 		this.room = room;
+		this.place = place;
 		participants = new ArrayList<User>();
 		addParticipant(admin);
 		this.hasChanged = false;
@@ -36,6 +38,10 @@ public class Event {
 		return this.idEvent;
 	}
 
+	public String getPlace() {
+		return this.place;
+	}
+	
 	public String getName() {
 		return this.name;
 	}
@@ -73,6 +79,11 @@ public class Event {
 		this.hasChanged = true;
 	}
 
+	public void setPlace(String place) {
+		this.place = place;
+		this.hasChanged = true;
+	}
+	
 	public void setRoom(Room room) {
 		this.room = room;
 		room.addEvent(this);
