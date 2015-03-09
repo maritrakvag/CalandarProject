@@ -208,10 +208,10 @@ public class Program {
 	}
 
 	public void getUsernamePassword(){
-		System.out.println("Username: ");
+		System.out.println("Username:");
 		String username = sc.nextLine();
 		System.out.println("Password: ");
-		String password=  sc.nextLine();
+		String password=  readPassword(sc.nextLine());
 		boolean login = login(username,password);
 		if (login){
 			System.out.println("You are now logged in");
@@ -221,6 +221,25 @@ public class Program {
 			getUsernamePassword();
 		}
 	}
+
+	public static String readPassword (String prompt) {
+      		EraserThread et = new EraserThread(prompt);
+      		Thread mask = new Thread(et);
+      		mask.start();
+
+      		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      		String password = "";
+
+      		try {
+         	password = in.readLine();
+			 } catch (IOException ioe) {
+        		ioe.printStackTrace();
+      		}
+      		// stop masking
+      		et.stopMasking();
+		 // return the password entered by the user
+      		return password;
+   }
 	
 	private boolean login(String username, String password){
 		for (User user : Program.users){
