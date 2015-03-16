@@ -1,7 +1,7 @@
 package calendar;
 
 import group.Group;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -16,7 +16,6 @@ public class Event {
 	private String description;
 	private Room room;
 	private User admin;
-	private boolean hasChanged;
 	private String place;
 	private ArrayList<User> participants;
 
@@ -31,7 +30,6 @@ public class Event {
 		this.place = place;
 		participants = new ArrayList<User>();
 		addParticipant(admin);
-		this.hasChanged = false;
 	}
 
 	public int getIdEvent() {
@@ -48,6 +46,18 @@ public class Event {
 
 	public Date getStart() {
 		return this.start;
+	}
+	
+	public String getStringStart() {
+		SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yy HH:mm");
+		String startString = ft.format(start);
+		return startString;
+	}
+	
+	public String getStringEnd() {
+		SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yy HH:mm");
+		String endString = ft.format(end);
+		return endString;
 	}
 
 	public Date getEnd() {
@@ -70,18 +80,12 @@ public class Event {
 		return this.participants;
 	}
 
-	public boolean hasChanged() {
-		return this.hasChanged;
-	}
-
 	public void setName(String name) {
 		this.name = name;
-		this.hasChanged = true;
 	}
 
 	public void setPlace(String place) {
 		this.place = place;
-		this.hasChanged = true;
 	}
 	
 	public void setRoom(Room room) {
@@ -89,15 +93,18 @@ public class Event {
 		room.addEvent(this);
 	}
 	
-	public void setDate(Date start, Date end) {
-		this.start = start;
-		this.end = end;
-		this.hasChanged = true;
+	public boolean setDate(Date start, Date end) {
+		if (start.before(end)) {
+			this.start = start;
+			this.end = end;
+			return true;
+		}
+		return false;
+		
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
-		this.hasChanged = true;
 	}
 
 	public boolean containsParticipant(User participant) {
@@ -130,7 +137,6 @@ public class Event {
 			this.room.removeEvent(this);
 			this.room = room;
 			room.addEvent(this);
-			this.hasChanged = true;
 		}
 	}
 

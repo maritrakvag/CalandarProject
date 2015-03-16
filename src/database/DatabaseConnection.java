@@ -7,8 +7,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -31,6 +29,191 @@ public class DatabaseConnection {
 		}
 	}
 	
+	public void changeStatus(int idEvent, String username) {
+		String query = "";
+		if (userHasAccepted(idEvent, username)) {
+			query = "update invitedto set status = 0 where event = " + idEvent + " and user = '" + username + "'";
+		} else {
+			query = "update invitedto set status = 1 where event = " + idEvent + " and user = '" + username + "'";
+		}
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean userHasAccepted(int idEvent, String username) {
+		String query = "select status from invitedto where event = " + idEvent + " and user = '" + username + "'";
+		try {
+			ResultSet rs = stat.executeQuery(query);
+			if (rs.next()) {
+				int status = rs.getInt("status");
+				return status == 1;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public int findIdEvent() {
+		String query = "select MAX(idEvent) as maxID from event";
+		try {
+			ResultSet rs = stat.executeQuery(query);
+			rs.next();
+			return rs.getInt("maxID") + 1;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
+	public int findIdGroup() {
+		String query = "select MAX(idGroup) as maxID from groups";
+		try {
+			ResultSet rs = stat.executeQuery(query);
+			rs.next();
+			return rs.getInt("maxID") + 1;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
+	public void addGroupMember(int groupId, String username) {
+		String query = "insert into user_has_group (User_username, Group_idGroup) values ('" + username + "',"+ groupId + ")";
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteGroupMember(int groupId, String username) {
+		String query = "delete from user_has_group where User_username = '" + username + "' and Group_idGroup = " + groupId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeEvent(int eventId) {
+		String query = "delete from event where idEvent = " + eventId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeEventDate(int idEvent, String start, String end) {
+		String query = "update event set startTime = '" + start + "' where idEvent = " + idEvent;
+		String query2 = "update event set endTime = '" + end + "' where idEvent = " + idEvent;
+		try {
+			stat.executeUpdate(query);
+			stat.executeUpdate(query2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeEventName(int eventId, String newname) {
+		String query = "update event set name = '" + newname + "' where idEvent = "+ eventId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeEventDescription(int eventId, String newdescription) {
+		String query = "update event set description = '" + newdescription + "' where idEvent = " + eventId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeEventPlace(int eventId, String newplace) {
+		String query = "update event set place = '" + newplace + "' where idEvent = " + eventId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void changeEventRoom(int eventId, int roomID) {
+		String query = "update bookedfor set room = " + roomID + " where event = " + eventId;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addEventParticipant(int eventId, String username) {
+		String query = "insert into invitedto (event,user,status,seenChange) values (" + eventId + ",'"+ username + "', 0 , 1)";
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeEventParticipant(int eventId, String username) {
+		String query = "delete from invitedto where event = " + eventId + " and user = '" + username + "'";
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void eventHasChanged(Event event) {
+		String query = "update invitedto set seenchange = 0 where event = " + event.getIdEvent() + " and user != '" + event.getAdmin().getUsername() + "'";
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteGroup(int idGroup) {
+		String query = "delete from groups where idGroup = " + idGroup;
+		try {
+			stat.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ArrayList<Event> changedEvents(String username) {
+		ArrayList<Event> events = new ArrayList<Event>();
+		String query = "select event from invitedto where user = '" + username + "' and seenChange = 0";
+		ResultSet rs;
+		try {
+			rs = stat.executeQuery(query);
+			while (rs.next()) {
+				for (Event event : Program.events) {
+					if (rs.getInt("event") == event.getIdEvent()) {
+						events.add(event);
+						break;
+					}
+				}
+			}
+			
+			String query2 = "update invitedto set seenChange = 1 where user = '" + username + "'";
+			stat.executeUpdate(query2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return events;
+	}
+
 	public void addEvent(Event event,String start, String end) {
 		try {
 			int idEvent = event.getIdEvent();
@@ -38,39 +221,27 @@ public class DatabaseConnection {
 			String admin = event.getAdmin().getUsername();
 			String description = event.getDescription();
 			String place = event.getPlace();
-	
-			System.out.println(idEvent + name + start + end + admin + description + place);
-			
 			String query = "insert into event"
-					+ " (idEvent, name, startTime, endTime, description, admin, hasChanged, place)"
-					+ " values (" + idEvent + ",'" + name + "','" + start + "','" + end + "','" + admin +"','" + description + "'," + 0 + ",'" + place +  "')";
-			
-			stat.executeQuery(query);
-			
+					+ " (idEvent, name, startTime, endTime, description, username, place)"
+					+ " values (" + idEvent + ",'" + name + "','" + start + "','" + end + "','" + description +"','" + admin +"','" + place +  "');";
+			Statement stat1 = conn.createStatement();
+			stat1.executeUpdate(query);
 			Room room = event.getRoom();
-			
 			if (room != null) {
-				
 				String query2 = "insert into bookedfor" 
 						+ "(room,event)" 
-						+ " values ('" + room + "','"  + idEvent +"')";
-				
+						+ " values (" + room.getRoomID() + ","  + idEvent +")";
 				Statement stat2 = conn.createStatement();
-				stat2.executeQuery(query2);
+				stat2.executeUpdate(query2);
 			}
-			
 			for (User user : event.getParticipants()) {
 				String username = user.getUsername();
-				
 				String query3 = "insert into invitedto" 
 						+ "(event,user,status,seenChange)" 
-						+ " values ('" + idEvent + "','"  + username + "',"  + 0 + ","  + 0 + ")";
-			
+						+ " values ('" + idEvent + "','"  + username + "',"  + 0 + ","  + 1 + ")";
 				Statement stat3 = conn.createStatement();
-				stat3.executeQuery(query3);
+				stat3.executeUpdate(query3);
 			}
-			
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -84,7 +255,6 @@ public class DatabaseConnection {
 					+ " (idGroup, name)"
 					+ " values ('" + idGroup + "','" + name +"')";
 			stat.executeUpdate(query);
-			
 			for (User user : group.getMembers()) {
 				String username = user.getUsername();
 				String query2 = "insert into user_has_group"
@@ -109,7 +279,6 @@ public class DatabaseConnection {
 					+ " ( username, first_name, last_name, email, password)"
 					+ " values ('" + username + "','" + firstname + "','"
 					+ lastname + "','" + email + "','" + password + "')";
-
 			stat.executeUpdate(queryUser);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -122,7 +291,7 @@ public class DatabaseConnection {
 			String query = "SELECT * FROM room";
 			ResultSet rs = stat.executeQuery(query);
 			while (rs.next()) {
-				Room room = new Room(rs.getString("idRoom"),
+				Room room = new Room(rs.getInt("idRoom"),
 						rs.getInt("capacity"));
 				rooms.add(room);
 			}
@@ -167,7 +336,6 @@ public class DatabaseConnection {
 							break;
 						}
 					}
-					
 					group.addMember(groupUser);
 				}
 				groups.add(group);
@@ -177,55 +345,45 @@ public class DatabaseConnection {
 		}
 		return groups;
 	}
-	
-	private Date string2date(String stringDate)  {
-		java.util.Date date = null;
-		try {
-	      SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-	      date = ft.parse(stringDate);
-		} catch (ParseException e){
-			e.printStackTrace();
-		}
-		return date;
-	}
 
 	public ArrayList<Event> initEvents() {
 		ArrayList<Event> events = new ArrayList<Event>();
 		try {
-			String queryEvent = "select idEvent, name, startTime, endTime, description, admin, place, idRoom from event, room, BookedFor where event.idEvent=bookedfor.event and room.idroom=bookedfor.room";
-
+			String queryEvent = "select * from event";
 			ResultSet rse = stat.executeQuery(queryEvent);
-
 			while (rse.next()) {
 				User admin = null;
 				for (User user : Program.users) {
-					if (user.getUsername().equals(rse.getString("admin"))) {
+					if (user.getUsername().equals(rse.getString("username"))) {
 						admin = user;
 						break;
 					}
 				}
+				String queryRoom = "select * from bookedfor where bookedfor.event = " + rse.getInt("idEvent");
+				Statement stat2 = conn.createStatement();
+				ResultSet rsRoom = stat2.executeQuery(queryRoom);
 				Room eventRoom = null;
-				for (Room room : Program.rooms) {
-					if (room.getRoomID().equals(rse.getString("idRoom"))) {
-						eventRoom = room;
-						break;
+				while (rsRoom.next()) {
+					for (Room room : Program.rooms) {
+						if (room.getRoomID() == rsRoom.getInt("room")) {
+							eventRoom = room;
+							break;
+						}
 					}
 				}
-				
-				Date start = string2date(rse.getString("startTime"));
-				Date end = string2date(rse.getString("endTime"));
-				
+				Date start = Program.string2date(rse.getString("startTime"));
+				Date end = Program.string2date(rse.getString("endTime"));
 				Event event = new Event(rse.getInt("idEvent"),
 						rse.getString("name"), start,
 						end, admin,
 						rse.getString("description"),rse.getString("place"), eventRoom);
-				
-				eventRoom.addEvent(event);
-
-				String queryMembers = "select * from invitedto where event = "
+				if (eventRoom!= null) {
+					eventRoom.addEvent(event);
+				}
+				String queryMembers = "select * from invitedto where invitedto.event = "
 						+ rse.getInt("idEvent");
-				Statement stat2 = conn.createStatement();
-				ResultSet rsm = stat2.executeQuery(queryMembers);
+				Statement stat3 = conn.createStatement();
+				ResultSet rsm = stat3.executeQuery(queryMembers);
 				while (rsm.next()) {
 					User eventmember = null;
 					for (User user : Program.users) {
@@ -238,10 +396,10 @@ public class DatabaseConnection {
 				}
 				events.add(event);
 			}
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return events;
 	}
+	
 }

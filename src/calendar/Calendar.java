@@ -27,6 +27,10 @@ public class Calendar {
 		return events.contains(event);
 	}
 	
+	public ArrayList<Event> getEvents() {
+		return this.events;
+	}
+	
 	//Sjekker om kalenderen er ledig til det tidspunktet avtalen(input) har. 
 	public boolean isAvailable(Event event1) {
 		for (Event event2 : events) {

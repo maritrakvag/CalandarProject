@@ -20,7 +20,8 @@ public class EraserThread implements Runnable {
       while (stop) {
          System.out.print("\010*");
      try {
-        Thread.currentThread().sleep(1);
+        Thread.currentThread();
+		Thread.sleep(1);
          } catch(InterruptedException ie) {
             ie.printStackTrace();
          }

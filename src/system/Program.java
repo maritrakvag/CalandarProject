@@ -21,11 +21,13 @@ public class Program {
 	public static ArrayList<Group> groups;
 	private User admin;
 	private DatabaseConnection dbc;
-	private Scanner sc;
+	private static Scanner sc;
+	public static SimpleDateFormat sdf;
 
 	public Program() {
 		sc = new Scanner(System.in);
 		dbc = new DatabaseConnection("jdbc:mysql://localhost:3306/calendarsystem", "root", "passord");
+		sdf = new SimpleDateFormat("dd.MM.yy HH:mm");
 	}
 
 	public void init() {
@@ -34,168 +36,39 @@ public class Program {
 		events = dbc.initEvents();
 		groups = dbc.initGroups();
 	}
+	
+	
+	//MÅ FIKSES
+	public static String readPassword (String prompt) {
+      		EraserThread et = new EraserThread(prompt);
+      		Thread mask = new Thread(et);
+      		mask.start();
 
-	public void printAddGroup() {
-		System.out.println("Group name:");
-		String groupName = sc.nextLine();
-		int idGroup = Program.groups.size() + 1;
-		//Dette funker ikke.. 
-	/*	int idGroup = 0;
-		for (int i = 1; i <= Program.groups.size(); i++) {
-			for (Group group : Program.groups) {
-				if (group.getIdGroup() == i) {
-					break;
-				}
-			}
-			idGroup = i;
-		}
-		if (idGroup == 0) {
-			idGroup = Program.groups.size() + 1;
-		}*/
-		Group group = new Group(idGroup, groupName);
-		group.addMember(admin);
-		while (true) {
-			System.out.println("1.Legg til medlem \n2. Lag gruppe");
-			int option = sc.nextInt();
-			sc.nextLine();
-			if (option == 1) {
-				System.out.println("Username: ");
-				String username = sc.nextLine();
-				User groupMember = null;
-				for (User user : Program.users) {
-					if (user.getUsername().equals(username)) {
-						groupMember = user;
-						break;
-					}
-				}
-				if (groupMember == null) {
-					System.out.println("Brukeren finns ikke");
-				} else {
-					group.addMember(groupMember);
-				}
-			} else {
-				addGroup(group);
-				return;
-			}
-		}
-	}
+      		//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      		String password = "";
 
-	private void addGroup(Group group) {
-		Program.groups.add(group);
-		dbc.addGroup(group);
-	}
-
-	public void printAddEvent(){
-		System.out.println("Name:");
-		String name=sc.nextLine();
-		System.out.println("Description:");
-		String description=sc.nextLine();
-		int idEvent = Program.events.size() + 1;
-		
-		System.out.println("Start: YYYY-MM-DD hh:mm");
-		String start = sc.nextLine();
-		
-		System.out.println("End: YYYY-MM-DD hh:mm");
-		String end = sc.nextLine();
-		
-		Date startDate = string2date(start);
-		Date endDate = string2date(end);
-		
-		System.out.println("Place: ");
-		String place = sc.nextLine() ;
-		
-		Event event = new Event(idEvent,name,startDate,endDate,this.admin,description,place,null);
-		
-		while(true) {
-			System.out.println("1.Add participants \n2.Finish");
-			int option = sc.nextInt();
-			sc.nextLine();
-			if (option == 1) {
-				System.out.println("Username: ");
-				String username = sc.nextLine();
-				User participant = null;
-				for (User user : Program.users) {
-					if (user.getUsername().equals(username)) {
-						participant = user;
-						break;
-					}
-				}
-				if (participant == null) {
-					System.out.println("the user was not found");
-				} else {
-					event.addParticipant(participant);
-				}
-			} else {
-				break;
-			}
-		}
-		
-		System.out.println("Book room? \n1. Yes \n2.No");
-		int input = sc.nextInt();
-		sc.nextLine();
-		
-		if (input == 1) {
-			boolean room = bookRoom(event);
-			
-			if (!room) {
-				System.out.println("No available rooms");
-				return;
-			}
-		}
-		addEvent(event,start,end);
-	}
-
-	private void addEvent(Event event,String start, String end) {
-		Program.events.add(event);
-		dbc.addEvent(event,start,end);
+      		try {
+         	password = sc.nextLine();
+			 } catch (Exception ioe) {
+        		ioe.printStackTrace();
+      		}
+      		// stop masking
+      		et.stopMasking();
+		 // return the password entered by the user
+      		return password;
+   }
+	
+	
+	
+	//HJELPEMETODER
+	private boolean isValidDate(Date start, Date end) {
+		return start.before(end);
 	}
 	
-	private boolean bookRoom(Event event) {
-		for (Room room : Program.rooms) {
-			if (room.isAvailable(event)
-					&& room.getCapacity() >= event.getNumberofParticipants()) {
-				event.setRoom(room);
-				return true;
-			}
-		}
-		return false;
+	private void wrongInput() {
+		System.out.println("Wrong input, please try again");
 	}
 	
-	private Date string2date(String stringDate)  {
-		java.util.Date date = null;
-		try {
-	      SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-	      date = ft.parse(stringDate);
-		} catch (ParseException e){
-			e.printStackTrace();
-		}
-		return date;
-	}
-	
-	public void printAddUser() {
-		System.out.println("Username:");
-		String username = sc.nextLine();
-		if (!isValidUsername(username)) {
-			System.out.println("This username is not available");
-			return;
-		}
-		System.out.println("Firstname:");
-		String firstname = sc.nextLine();
-		System.out.println("Lastname:");
-		String lastname = sc.nextLine();
-		System.out.println("Password:");
-		String password = sc.nextLine();
-		System.out.println("Mail:");
-		String mail = sc.nextLine();
-		User user = new User(username, firstname, lastname, mail, password);
-		addUser(user);
-	}
-
-	private void addUser(User user) {
-		Program.users.add(user);
-		dbc.addUser(user);
-	}
-
 	private boolean isValidUsername(String username) {
 		if (!users.isEmpty()) {
 			for (User user : users) {
@@ -206,40 +79,826 @@ public class Program {
 		}
 		return true;
 	}
+	
+	private User getUserFromUsername(String username) {
+		User outputuser = null;
+		for (User user : Program.users) {
+			if (user.getUsername().equals(username)) {
+				outputuser = user;
+				break;
+			}
+		}
+		return outputuser;
+	}
+	
+	private Event getEventFromId(int id) {
+		Event outputevent = null;
+		for (Event event : Program.events) {
+			if (event.getIdEvent() == id) {
+				outputevent = event;
+				break;
+			}
+		}
+		return outputevent;
+	}
+	
+	private Room getRoomFromId(int id) {
+		Room outputroom = null;
+		for (Room room : Program.rooms) {
+			if (room.getRoomID() == id) {
+				outputroom = room;
+				break;
+			}
+		}
+		return outputroom;
+	}
+	
+	private Group getGroupFromId(int id ) {
+		Group outputgroup = null;
+		for (Group group : Program.groups) {
+			if (group.getIdGroup() == id) {
+				outputgroup = group;
+				break;
+			}
+		}
+		return outputgroup;
+	}
+	
+	private boolean bookRoom(Event event) {
+		for (Room room : Program.rooms) {
+			if (room.isAvailable(event) && room.getCapacity() >= event.getNumberofParticipants()) {
+				event.setRoom(room);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static Date string2date(String stringDate)  {
+		Date date = null;
+		try {
+			date = sdf.parse(stringDate);
+		} catch (ParseException e){
+			e.printStackTrace();
+		}
+		return date;
+	}
+	
+	public static String date2string(Date date) {
+		return sdf.format(date);
+	}
+	
+	
 
-	public void getUsernamePassword(){
-		System.out.println("Username:");
+	//GRUPPEMETODER
+	private void addGroup(Group group) {
+		Program.groups.add(group);
+		dbc.addGroup(group);
+	}
+	
+	private void printAddGroup() {
+		System.out.println("Enter group name:");
+		String groupName = sc.nextLine();
+		Group newgroup = new Group(dbc.findIdGroup(), groupName);
+		newgroup.addMember(admin);
+		while (true) {
+			System.out.println("\nDo you want to \n 1. Add a member \n 2. Finish and create group \n 3. Cancel");
+			int option = sc.nextInt();
+			sc.nextLine();
+			if (option == 1) {
+				while (true) {
+					System.out.println("\nThese users are available: ");
+					for (User user : Program.users) {
+						if (!newgroup.containsUser(user)) {
+							System.out.println("\t" + user.getUsername());
+						}
+					}
+					System.out.println("\n Enter the username of the user you want to add: ");
+					String username = sc.nextLine();
+					User newmember = getUserFromUsername(username);
+					if (newmember == null) {
+						wrongInput();
+					} else {
+						newgroup.addMember(newmember);
+						System.out.println("The user '" + newmember.getUsername() + "' was added to the group");
+						break;
+					}
+				}
+			} else if (option == 2) {
+				addGroup(newgroup);
+				System.out.println("The group '" + newgroup.getName() + "' was sucessfully created");
+				return;
+			} else if (option == 3) {
+				return;
+			} else {
+				wrongInput();
+			}
+		}
+	}
+	
+	public void printEditGroup() {
+		System.out.println("ID\tName ");
+		int counter = 0;
+		for (Group group : Program.groups) {
+			if (group.containsUser(admin)) {
+				System.out.println(group.getIdGroup()+"\t"+group.getName());
+				counter++;
+			}
+		}
+		if (counter == 0) {
+			System.out.println("you arent member of any groups");
+		} else {
+			System.out.println("Enter the ID for the group you want to edit: ");
+			int groupId = sc.nextInt();
+			sc.nextLine();
+			Group oldgroup = getGroupFromId(groupId);
+			if (oldgroup == null) {
+				wrongInput();
+			} else {
+				System.out.println("Do you want to \n 1. Add member \n 2. Delete member");
+				int option = sc.nextInt();
+				sc.nextLine();
+				if (option == 1) {
+					System.out.println("These users are not members: ");
+					int count = 0;
+					for (User user : Program.users) {
+						if (!oldgroup.containsUser(user)) {
+							System.out.println("\t" + user.getUsername());
+							count++;
+						}
+					}
+					if (count == 0) {
+						System.out.println("no available users");
+					} else {
+						System.out.println("Enter the username of the user you want to add: ");
+						String username = sc.nextLine();
+						User newmember = getUserFromUsername(username);
+						if (newmember != null) {
+							oldgroup.addMember(newmember);;
+							dbc.addGroupMember(groupId, username);
+						} else {
+							wrongInput();
+						}
+					}
+					
+				} else if (option == 2){
+					System.out.println("These users are members: ");
+					for (User user : oldgroup.getMembers()) {
+						System.out.println("\t" + user.getUsername());	
+					}
+					System.out.println("Enter the username of the user you want to delete: ");
+					String username = sc.nextLine();
+					User oldmember = getUserFromUsername(username);
+					if (oldmember != null) {
+						oldgroup.deleteMember(oldmember);
+						dbc.deleteGroupMember(groupId, username);
+					} else {
+						wrongInput();
+					}
+				} else {
+					wrongInput();
+				}
+			}
+		}
+	}
+	
+	public void printDeleteGroup() {
+		System.out.println("ID\tName ");
+		int counter = 0;
+		for (Group group : Program.groups) {
+			if (group.containsUser(admin)) {
+				System.out.println(group.getIdGroup()+"\t"+group.getName());
+				counter++;
+			}
+		}
+		if (counter == 0) {
+			System.out.println("You arent member of any groups");
+		} else {
+			System.out.println("\nChoose the group you want to delete: ");
+			int groupId = sc.nextInt();
+			sc.nextLine();
+			Group oldgroup = getGroupFromId(groupId);
+			if (oldgroup != null) {
+				Program.groups.remove(oldgroup);
+				dbc.deleteGroup(groupId);
+			} else {
+				wrongInput();
+			}
+		}
+	}
+	
+	
+	//EVENTMETODER
+	private void addEvent(Event event,String start, String end) {
+		dbc.changeStatus(event.getIdEvent(), event.getAdmin().getUsername());
+		Program.events.add(event);
+		dbc.addEvent(event,start,end);
+	}
+	
+	private void printAddEvent(){
+		System.out.println("Enter event name:");
+		String name = sc.nextLine();
+		System.out.println("Enter event description:");
+		String description = sc.nextLine();
+		int idEvent = dbc.findIdEvent();
+		Date startDate = null;
+		Date endDate = null;
+		while (true) {
+			do {
+				System.out.println("Enter start: (dd.mm.yy hh:mm)");
+				String start = sc.nextLine();
+				startDate = string2date(start);
+			} while (startDate == null);
+			do {
+				System.out.println("Enter end: (dd.mm.yy hh:mm)");
+				String end = sc.nextLine();
+				endDate = string2date(end);
+			} while (endDate == null);
+
+			if (!isValidDate(startDate, endDate)) {
+				System.out.println("End must be after start, try again");
+			} else {
+				break;
+			}
+		}
+		
+		System.out.println("Enter place: ");
+		String place = sc.nextLine() ;
+		Event newevent = new Event(idEvent,name,startDate,endDate,this.admin,description,place,null);
+		while(true) {
+			System.out.println("\nDo you want to \n 1. Invite user to event \n 2. Invite group to event \n 3. Finish and create event \n 4. Cancel");
+			int option = sc.nextInt();
+			sc.nextLine();
+			if (option == 1) {
+				while (true) {
+					int counter = 0;
+					System.out.println("These users are not invited: ");
+					for (User user : Program.users) {
+						if (!newevent.containsParticipant(user)) {
+							System.out.println("  " + user.getUsername());
+							counter++;
+						}
+					}
+					if (counter == 0) {
+						System.out.println("No users was found \n");
+						break;
+					} else {
+						System.out.println("\nEnter the username of the user you want to invite: ");
+						String username = sc.nextLine();
+						User newparticipant = getUserFromUsername(username);
+						if (newparticipant == null) {
+							wrongInput();
+						} else {
+							newevent.addParticipant(newparticipant);
+							System.out.println("The user '" + newparticipant.getUsername() + "' was invited to the event");
+							break;
+						}
+					}
+				}
+			} else if (option == 2) {
+				if (Program.groups.size() == 0) {
+					System.out.println("There is no groups");
+				} else {
+					System.out.println("ID\tName");
+					for (Group group : Program.groups) {
+						System.out.println(group.getIdGroup() + "\t" + group.getName());
+					}
+					System.out.println("Enter the ID for the group you want to invite");
+					int groupId = sc.nextInt();
+					sc.nextLine();
+					Group invitegroup = getGroupFromId(groupId);
+					for (User user : invitegroup.getMembers()) {
+						if (!newevent.containsParticipant(user)) {
+							newevent.addParticipant(user);
+							System.out.println("The user '" + user.getUsername() + "' was invited to the event");
+						}
+					}
+					break;
+				}
+				
+			} else if (option == 3) {
+				break;
+			} else if (option == 4) {
+				return;
+			} else {
+				wrongInput();
+			}
+		}		
+		while (true) {
+			System.out.println("\nDo you want to book a room? \n 1. Yes \n 2. No");
+			int input = sc.nextInt();
+			sc.nextLine();
+			if (input == 1) {
+				boolean room = bookRoom(newevent);
+				if (!room) {
+					System.out.println("There is no available rooms for your event..");
+					System.out.println("Do you still want to make the event? \n 1. Yes \n 2. No");
+					int n = sc.nextInt();
+					sc.nextLine();
+					if (n == 1) {
+						break;
+					} else if (n == 2) {
+						return;
+					} else {
+						wrongInput();
+					}
+				} else {
+					System.out.println("The room with ID '" + newevent.getRoom().getRoomID() + "' was booked");
+					break;
+				}
+			} else if (input == 2){
+				break;
+			} else {
+				wrongInput();
+			}
+		}
+		String start = date2string(startDate);
+		String end = date2string(endDate);
+		addEvent(newevent,start,end);
+	}	
+	
+	private void printEditEvent() {
+		Event oldevent = null;
+		int eventId = 0;
+		while (true) {
+			System.out.println("Enter the ID of the event you want to edit: ");
+			System.out.println("ID\tName ");
+			for (Event event : Program.events) {
+				if (event.getAdmin().equals(admin)) {
+					System.out.println(event.getIdEvent()+ "\t" +event.getName());
+				}
+			}
+			eventId = sc.nextInt();
+			sc.nextLine();
+			oldevent = getEventFromId(eventId);
+			if (oldevent == null) {
+				wrongInput();
+			} else {
+				break;
+			}
+		}
+		while(true) {
+			System.out.println("\nWhat do you want to change? \n 1. Name \n 2. Time \n 3. description \n 4. Place \n 5. Room \n 6. Participants");
+			int input = sc.nextInt();
+			sc.nextLine();
+			if (input == 1) {
+				System.out.println("\nThis is the old name: " + oldevent.getName());
+				System.out.println("Enter new name: ");
+				String newname = sc.nextLine();
+				dbc.changeEventName(eventId, newname);
+				oldevent.setName(newname);
+			} else if (input == 2) {
+				while (true) {
+					System.out.println("\nThis is the old start: " + oldevent.getStringStart());
+					System.out.println("This is the old end: " + oldevent.getStringEnd());
+					Date newstartdate = null;
+					Date newenddate = null;
+					do {
+						System.out.println("Enter new start: (dd.mm.yy hh:mm)");
+						String newstart = sc.nextLine();
+						newstartdate = string2date(newstart);
+					} while (newstartdate == null);
+					do {
+						System.out.println("Enter new end: (dd.mm.yy hh:mm)");
+						String newend = sc.nextLine();
+						newenddate = string2date(newend);
+					} while (newenddate == null);
+					boolean newdate = oldevent.setDate(newstartdate, newenddate);
+					if (newdate) {
+						String newstart = date2string(newstartdate);
+						String newend = date2string(newenddate);
+						dbc.changeEventDate(eventId, newstart, newend);
+						break;
+					} else {
+						System.out.println("End must be after start, try again");
+					}
+				}
+			} else if (input == 3) {
+				System.out.println("\nThis is the old description: " + oldevent.getDescription());
+				System.out.println("Enter new description: ");
+				String newdescription = sc.nextLine();
+				dbc.changeEventDescription(eventId, newdescription);
+				oldevent.setDescription(newdescription);
+			} else if (input == 4) {
+				System.out.println("\nThis is the old place: " + oldevent.getPlace());
+				System.out.println("Enter new place: ");
+				String newplace = sc.nextLine();
+				dbc.changeEventPlace(eventId, newplace);
+				oldevent.setPlace(newplace);
+			} else if (input == 5) {
+				if (oldevent.getRoom() != null) {
+					System.out.println("\nThis is the old roomId: " + oldevent.getRoom().getRoomID());
+				} else {
+					System.out.println("\nThere is currently no room reserved for this event");
+				}
+				while (true) {
+					System.out.println("Avaiable rooms for the event \nID\tcapacity");
+					int counter = 0;
+					for (Room room : Program.rooms) {
+						if (room.isAvailable(oldevent)) {
+							System.out.println(room.getRoomID() + "\t" + room.getCapacity());
+							counter++;
+						}
+					}
+					if (counter == 0) {
+						System.out.println("There is no available rooms");
+						break;
+					} 
+					System.out.println("\nEnter the ID for the room you want to book: ");
+					int roomId = sc.nextInt();
+					sc.nextLine();
+					dbc.changeEventRoom(eventId,roomId);
+					Room newroom = getRoomFromId(roomId);
+					if (newroom == null) {
+						wrongInput();
+					} else {
+						if (oldevent.getRoom() != null) {
+							oldevent.getRoom().removeEvent(oldevent);
+						}
+						oldevent.setRoom(newroom);
+						break;
+					}
+				}
+			} else if (input == 6) {
+				System.out.println("\nDo you want to \n 1. Invite user \n 2. Invite group \n 3. Remove user");
+				int input2 = sc.nextInt();
+				sc.nextLine();
+				if (input2 == 1) {
+					int counter = 0;
+					System.out.println("\nThese users are not invited");
+					for (User user : Program.users) {
+						if (!user.isInvitedTo(oldevent)) {
+							System.out.println("\t" + user.getUsername());
+							counter++;
+						}
+					}
+					if (counter == 0) {
+						System.out.println("No users available");
+					} else {
+						System.out.println("\nEnter the username of the user you want to invite");
+						String username = sc.nextLine();
+						User newuser = getUserFromUsername(username);
+						if (newuser != null) {
+							dbc.addEventParticipant(eventId, username);
+							oldevent.addParticipant(newuser);
+						} else {
+							wrongInput();
+						}
+					}
+				} else if(input2 == 2) {
+					if (Program.groups.size() == 0) {
+						System.out.println("There is no groups");
+					} else {
+						System.out.println("ID\tName");
+						for (Group group : Program.groups) {
+							System.out.println(group.getIdGroup() + "\t" + group.getName());
+						}
+						System.out.println("Enter the ID for the group you want to invite");
+						int groupId = sc.nextInt();
+						sc.nextLine();
+						Group invitegroup = getGroupFromId(groupId);
+						for (User user : invitegroup.getMembers()) {
+							if (!oldevent.containsParticipant(user)) {
+								oldevent.addParticipant(user);
+								System.out.println("The user '" + user.getUsername() + "' was invited to the event");
+							}
+						}
+					}
+				} else if (input2 == 3) {
+					if (oldevent.getNumberofParticipants() > 1) {
+						while (true) {
+							System.out.println("\nThese users are invited: ");
+							for (User user : oldevent.getParticipants()) {
+								if (user != admin) {
+									System.out.println("\t" + user.getUsername());	
+								}
+							}
+							System.out.println("\nEnter the username of the user you want to remove from the event: ");
+							String username = sc.nextLine();
+							User removeuser = getUserFromUsername(username);
+							if (removeuser != null) {
+								dbc.removeEventParticipant(eventId, username);
+								oldevent.deleteParticipant(removeuser);
+								break;
+							} else {
+								wrongInput();
+							}
+						}
+					} else {
+						System.out.println("\nThere is no users to remove");
+					}
+				} else {
+					wrongInput();
+				}
+			} else {
+				wrongInput();
+			}
+			System.out.println("Do you want to make more changes? \n1. Yes \n2. No");
+			int option = sc.nextInt();
+			sc.nextLine();
+			if (option == 2) {
+				dbc.eventHasChanged(oldevent);
+				return;
+			}
+		}
+	}
+	
+	public void printDeleteEvent() {
+		System.out.println("ID\tName ");
+		int counter = 0;
+		for (Event event : Program.events) {
+			if (event.getAdmin().equals(admin)) {
+				System.out.println(event.getIdEvent()+"\t"+event.getName());
+				counter++;
+			}
+		}
+		if (counter == 0) {
+			System.out.println("you arent admin to any events");
+		} else {
+			System.out.println("Enter the ID to the event you want to delete: ");
+			int eventId = sc.nextInt();
+			sc.nextLine();
+			Event oldevent = getEventFromId(eventId);
+			if (oldevent == null) {
+				wrongInput();
+			} else {
+				for (User user : oldevent.getParticipants()) {
+					user.getUserCalendar().deleteEvent(oldevent);
+				}
+				Program.events.remove(oldevent);
+				dbc.removeEvent(eventId);
+			}
+			
+		}
+	}
+
+
+	//USERMETODER
+	private void addUser(User user) {
+		Program.users.add(user);
+		dbc.addUser(user);
+	}
+	
+	private void printAddUser() {
+		String username = "";
+		while (true){ 
+			System.out.println("Enter username:");
+			username = sc.nextLine();
+			if (!isValidUsername(username)) {
+				System.out.println("The username is not available, try again \n");
+			} else {
+				break;
+			}
+		}
+		System.out.println("Enter your given name:");
+		String firstname = sc.nextLine();
+		System.out.println("Enter your family name:");
+		String lastname = sc.nextLine();
+		
+		String password = "";
+		while (true) {
+			System.out.println("Enter password:");
+			String password1 = sc.nextLine();
+			System.out.println("Enter password again: ");
+			String password2 = sc.nextLine();
+			if (password1.equals(password2)) {
+				password = password1;
+				break;
+			} else {
+				System.out.println("the passwords did not match, try again");
+			}
+		}
+		System.out.println("Enter your email:");
+		String mail = sc.nextLine();
+		User user = new User(username, firstname, lastname, mail, password);
+		addUser(user);
+	}
+
+
+	
+	//SHOW	
+	public void printYourEvents() {
+		System.out.println("Events you have created: ");
+		System.out.println("Id\tName\t\t\tStart time\t\tEnd time\t\tDescription\t\t\tPlace\t\tRoom");
+		int counter = 0;
+		for (Event event : Program.events) {
+			if (admin.equals(event.getAdmin())) {
+				if (event.getRoom() == null) {
+					System.out.println(event.getIdEvent()+"\t"+event.getName()+"\t\t\t"+event.getStringStart()+"\t\t"+event.getStringEnd()+"\t\t"+event.getDescription()+"\t\t\t"+event.getPlace()+"\t\tNo room");
+				} else {
+					System.out.println(event.getIdEvent()+"\t"+event.getName()+"\t\t\t"+event.getStringStart()+"\t\t"+event.getStringEnd()+"\t\t"+event.getDescription()+"\t\t\t"+event.getPlace()+"\t\t"+event.getRoom().getRoomID());
+				}
+				counter++;
+			}
+		}
+		if (counter == 0) {
+			System.out.println("No events");
+		} else {
+			System.out.println("Choose event to see participants");
+			int idEvent = sc.nextInt();
+			sc.nextLine();
+			Event event = getEventFromId(idEvent);
+			if (event != null) {
+				while (true) {
+					System.out.println("Username\tAccepted");
+					int counter1 = 0;
+					for (User user : event.getParticipants()) {
+						if (!user.equals(admin)) {
+							if (dbc.userHasAccepted(idEvent, user.getUsername())) {
+								System.out.println(user.getUsername()+"\tYes");
+							} else {
+								System.out.println(user.getUsername()+"\tNo");
+							}
+							counter1++;
+						}
+					}
+					if (counter1 == 0) {
+						System.out.println("No participants");
+						break;
+					} else {
+						System.out.println("Do you want to change status for a participant? \n 1. Yes \n 2. No ");
+						int input = sc.nextInt();
+						sc.nextLine();
+						if (input == 1) {
+							System.out.println("Enter username: ");
+							String username = sc.nextLine();
+							dbc.changeStatus(idEvent, username);
+						} else if (input == 2) {
+							break;
+						} else {
+							wrongInput();
+						}
+					}
+				}
+				
+			} else {
+				System.out.println("Wrong input");
+			}
+		}
+	}
+	
+	public void printInvitedTo() {
+		System.out.println("Events you have accepted: ");
+		System.out.println("Id\tName");
+		int counter = 0;
+		for (Event event : Program.events) {
+			if (dbc.userHasAccepted(event.getIdEvent(), admin.getUsername()) && !event.getAdmin().equals(admin)) {
+				System.out.println(event.getIdEvent()+"\t"+event.getName());
+				counter++;
+			}
+		}
+		if (counter == 0) {
+			System.out.println("No events");
+		}
+		System.out.println("\nEvents you have not accepted: ");
+		System.out.println("Id\tName");
+		int counter2 = 0;
+		for (Event event : Program.events) {
+			if (event.containsParticipant(admin) && !dbc.userHasAccepted(event.getIdEvent(), admin.getUsername()) && !event.getAdmin().equals(admin)) {
+				System.out.println(event.getIdEvent()+"\t"+event.getName());
+				counter2++;
+			}
+		}
+		if (counter2 == 0) {
+			System.out.println("No events");
+		}
+		if (counter == 0 && counter2 ==  0) {
+			return;
+		}
+		System.out.println("Do you want to change your attendance \n1. Yes \n2. No");
+		int option = sc.nextInt();
+		sc.nextLine();
+		if (option == 1) {
+			System.out.println("Choose event");
+			int idEvent = sc.nextInt();
+			sc.nextLine();
+			dbc.changeStatus(idEvent, admin.getUsername());
+		} else {
+			return;
+		}
+	}
+	
+	public void printChangedEvents() {
+		System.out.println("Id\tAccepted\tName\t\t\tStart time\t\tEnd time\t\tDescription\t\t\tPlace\t\tRoom");
+		for (Event event : dbc.changedEvents(admin.getUsername())) {
+			String accepted = "";
+			if (dbc.userHasAccepted(event.getIdEvent(), admin.getUsername())) {
+				accepted = "Yes";
+			} else {
+				accepted = "No";
+			}
+			
+			if (event.getRoom() == null) {
+				System.out.println(event.getIdEvent()+"\t"+accepted+"\t"+event.getName()+"\t\t\t"+event.getStringStart()+"\t\t"+event.getStringEnd()+"\t\t"+event.getDescription()+"\t\t\t"+event.getPlace()+"\t\tNo room");
+			} else {
+				System.out.println(event.getIdEvent()+"\t"+accepted+"\t"+event.getName()+"\t\t\t"+event.getStringStart()+"\t\t"+event.getStringEnd()+"\t\t"+event.getDescription()+"\t\t\t"+event.getPlace()+"\t\t"+event.getRoom().getRoomID());
+				
+			}
+		}
+		
+		System.out.println("Do you want to change status? \n1. Yes \n2. No");
+		int option = sc.nextInt();
+		sc.nextLine();
+		if (option == 1) {
+			System.out.println("Choose event");
+			int idEvent = sc.nextInt();
+			sc.nextLine();
+			dbc.changeStatus(idEvent, admin.getUsername());
+		} else {
+			return;
+		}
+		
+	}
+	
+	public void printYourGroups() {
+		System.out.println("Your Groups: ");
+		System.out.println("Id\tName");
+		for (Group group : Program.groups) {
+			if (group.containsUser(admin)) {
+				System.out.println(group.getIdGroup()+"\t"+group.getName());
+			}
+		}
+	}
+
+	private void printViewOther() {
+		while (true) {
+			if (Program.users.size() <= 1) {
+				System.out.println("There is no other users");
+				break;
+			} else {
+				System.out.println("All the users: ");
+				for (User user : Program.users) {
+					if (user != admin) {
+						System.out.println(user.getUsername());
+					}
+				}
+				System.out.println("Enter username");
+				String username = sc.nextLine();
+				User viewuser = getUserFromUsername(username);
+				if (viewuser != null) {
+					System.out.println("\nEvents for the user '" + viewuser.getUsername() + "'");
+					System.out.println("Name\tStart\tEnd\tAccepted");
+					String accepted = "";
+					for (Event event : viewuser.getUserCalendar().getEvents()) {
+						if (dbc.userHasAccepted(event.getIdEvent(), username)) {
+							accepted = "Yes";
+						} else {
+							accepted = "No";
+						}
+						System.out.println(event.getName() + "\t" + event.getStringStart() + "\t" + event.getStringEnd() + "\t" + accepted);
+					}
+					System.out.println("\nDo you want to view more? \n 1. Yes \n 2. No");
+					int option = sc.nextInt();
+					sc.nextLine();
+					if (option == 1) {
+						
+					} else if (option == 2) {
+						break;
+					} else {
+						wrongInput();
+					}
+					
+				} else {
+					wrongInput();
+				}
+			}
+		}
+	}
+	
+	
+	//LOGIN
+	public void printLogin() {
+		while (true) {
+			System.out.println("Do you want to \n 1. Log in \n 2. Sign up");
+			int inp = sc.nextInt();
+			sc.nextLine();
+			if(inp == 1){
+				getUsernamePassword();
+				return;
+			}
+			else if(inp == 2){
+				printAddUser();
+			}
+			else{
+				System.out.print("Wrong input \n");
+			}
+		}
+	}
+	
+	private void getUsernamePassword(){
+		System.out.println("Enter username:");
 		String username = sc.nextLine();
-		System.out.println("Password: ");
-		String password=  readPassword(sc.nextLine());
+		System.out.println("Enter password: ");
+		String password = sc.nextLine();
 		boolean login = login(username,password);
 		if (login){
 			System.out.println("You are now logged in");
 		}
 		else{
-			System.out.println("The username or password is incorrect");
+			System.out.println("The username or password is incorrect, please try again \n");
 			getUsernamePassword();
 		}
 	}
-
-	public static String readPassword (String prompt) {
-      		EraserThread et = new EraserThread(prompt);
-      		Thread mask = new Thread(et);
-      		mask.start();
-
-      		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-      		String password = "";
-
-      		try {
-         	password = in.readLine();
-			 } catch (IOException ioe) {
-        		ioe.printStackTrace();
-      		}
-      		// stop masking
-      		et.stopMasking();
-		 // return the password entered by the user
-      		return password;
-   }
 	
 	private boolean login(String username, String password){
 		for (User user : Program.users){
@@ -250,50 +909,93 @@ public class Program {
 		}
 		return false;
 	}
+	
+	
 
-	public void printLogin() {
-		while (true) {
-			System.out.println("Do you want to \n1.Log in \n2.Add user");
-			int inp=sc.nextInt();
-			sc.nextLine();
-			if(inp == 1){
-				getUsernamePassword();
-				return;
-			}
-			else if(inp == 2){
-				printAddUser();
-			}
-			else{
-				System.out.print("You have to choose 1 or 2");
-			}
-		}
-	}
-	
-	public int printMenu() {
-		System.out.println("Menu \n1. Add event \n2. Add group \n3. Exit");
-		int n = sc.nextInt();
-		sc.nextLine();
-		return n;
-	}
-	
+	//RUN
 	public void run() {
 		while (true) {
-			int n = printMenu();
+			System.out.println("\nCalendar Menu \n 1. Event editor \n 2. Group editor \n 3. Your calendar \n 4. View other calendars \n 5. Log out");
+			int n = sc.nextInt();
+			sc.nextLine();
 			if (n == 1) {
-				printAddEvent();
+				while (true) {
+					System.out.println("\nEvent editor \n 1. Create a new event \n 2. Edit your events \n 3. Delete a event \n 4. Cancel");
+					int n1 = sc.nextInt();
+					sc.nextLine();
+					if (n1 == 1) {
+						printAddEvent();
+					} else if (n1 == 2) {
+						printEditEvent();
+					} else if (n1 == 3) {
+						printDeleteEvent();
+					} else if (n1 == 4) {
+						break;
+					} else {
+						wrongInput();
+					}
+				}
 			} else if (n == 2) {
-				printAddGroup();
+				while (true) {
+					System.out.println("\nGroup editor \n 1. Create a new group \n 2. Edit your groups \n 3. Delete a group \n 4. Cancel ");
+					int n1 = sc.nextInt();
+					sc.nextLine();
+					if (n1 == 1) {
+						printAddGroup();
+					} else if (n1 == 2) {
+						printEditGroup();
+					} else if (n1 == 3){
+						printDeleteGroup();
+					} else if (n1 == 4) {
+						break;
+					} else {
+						wrongInput();
+					}
+				}
 			} else if (n == 3) {
-				return;
+				while (true) {
+					System.out.println("\nYour calendar \n 1. View your events \n 2. View your groups \n 3. Cancel");
+					int n1 = sc.nextInt();
+					sc.nextLine();
+					if (n1 == 1) {
+						while (true) {
+							System.out.println("\nYour events \n 1. Events you have created \n 2. Events you have been invited to \n 3. Events that has been changed \n 4. Cancel");
+							int n2 = sc.nextInt();
+							sc.nextLine();
+							if (n2 == 1) {
+								printYourEvents();
+							} else if (n2 == 2) {
+								printInvitedTo();
+							} else if (n2 == 3) {
+								printChangedEvents();
+							} else if (n2 == 4) {
+								break;
+							} else {
+								wrongInput();
+							}
+						}
+					} else if (n1 == 2) { 
+						printYourGroups();
+					} else if (n1 == 3) {
+						break;
+					} else {
+						wrongInput();
+					}
+				}
+			} else if (n == 4) {
+				printViewOther();
+			} else if (n == 5) {
+				printLogin();
+			} else {
+				wrongInput();
 			}
 		}
 	}
-
+	
 	public static void main(String[] args) {
 		Program p = new Program();
 		p.init();
 		p.printLogin();
 		p.run();
 	}
-
 }

@@ -70,6 +70,10 @@ public class User {
 	  return userCalendar.isAvailable(event);
   }
   
+  public boolean isInvitedTo(Event event) {
+	  return userCalendar.containsEvent(event);
+  }
+  
   public String toString() {
 	  return this.username + this.firstname + this.lastname + this.email + this.password;
   }
