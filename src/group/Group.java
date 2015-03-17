@@ -2,21 +2,17 @@ package group;
 
 import java.util.ArrayList;
 
-import calendar.Event;
-import calendar.GroupCalendar;
 import user.User;
 
 public class Group {
 	private ArrayList<User> users;
 	private int idGroup;
 	private String name;
-	private GroupCalendar groupCalendar;
 
 	public Group(int idGroup, String name) {
 		users = new ArrayList<User>();
 		this.idGroup = idGroup;
 		this.name = name;
-		this.groupCalendar = new GroupCalendar(this);
 	}
 	
 	public int getIdGroup() {
@@ -50,8 +46,4 @@ public class Group {
 	public boolean containsUser(User user) {
 		return users.contains(user);
 	}
-	
-	 public boolean isAvailable(Event event) {
-		  return groupCalendar.isAvailable(event);
-	  }
 }

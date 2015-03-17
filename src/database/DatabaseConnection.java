@@ -18,9 +18,9 @@ import user.User;
 
 public class DatabaseConnection {
 
-	Connection conn = null;
-	Statement stat = null;
-
+	private Connection conn = null;
+	private Statement stat = null;
+	
 	public DatabaseConnection(String url, String username, String password) {
 		try {
 			this.conn = DriverManager.getConnection(url, username, password);

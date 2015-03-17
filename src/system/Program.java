@@ -2,7 +2,6 @@ package system;
 
 import group.Group;
 
-import java.io.Console;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -288,7 +287,7 @@ public class Program {
 		}
 	}
 	
-	public void printDeleteGroup() {
+	private void printDeleteGroup() {
 		System.out.println("Groups you are member of");
 		System.out.println(" ID\tName ");
 		counter = 0;
@@ -589,7 +588,7 @@ public class Program {
 		}
 	}
 	
-	public void printDeleteEvent() {
+	private void printDeleteEvent() {
 		System.out.println("Events you have created");
 		System.out.println("ID\tName ");
 		counter = 0;
@@ -661,7 +660,7 @@ public class Program {
 
 	
 	//SHOW	
-	public void printYourEvents() {
+	private void printYourEvents() {
 		System.out.println("Events you have created: ");
 		System.out.println("Id\tName\t\t\tStart time\t\tEnd time\t\tDescription\t\t\tPlace\t\tRoom");
 		counter = 0;
@@ -721,7 +720,7 @@ public class Program {
 		}
 	}
 	
-	public void printInvitedTo() {
+	private void printInvitedTo() {
 		System.out.println("Events you have accepted: ");
 		System.out.println("Id\tName");
 		int counter = 0;
@@ -761,7 +760,7 @@ public class Program {
 		}
 	}
 	
-	public void printChangedEvents() {
+	private void printChangedEvents() {
 		System.out.println("Id\tAccepted\tName\t\t\tStart time\t\tEnd time\t\tDescription\t\t\tPlace\t\tRoom");
 		counter = 0;
 		for (Event event : dbc.changedEvents(admin.getUsername())) {
@@ -796,7 +795,7 @@ public class Program {
 		
 	}
 	
-	public void printYourGroups() {
+	private void printYourGroups() {
 		System.out.println("Your Groups: ");
 		System.out.println("Id\tName");
 		counter = 0;
@@ -857,7 +856,7 @@ public class Program {
 	
 	
 	//LOGIN
-	public void printLogin() {
+	private void printLogin() {
 		while (true) {
 			System.out.println("Do you want to \n 1. Log in \n 2. Sign up");
 			int inp = getUserInput();
@@ -878,12 +877,14 @@ public class Program {
 		System.out.println("Enter username:");
 		String username = sc.nextLine();
 		
-		/*System.out.println("Enter password: ");
-		String pass = sc.nextLine();*/
-		Console console = System.console();
-		char[] passwd = console.readPassword("Enter password: ");
+		System.out.println("Enter password: ");
+		String pass = sc.nextLine();
 		
-		boolean login = login(username,passwd.toString());
+		//Dette funker ikke
+		/*Console console = System.console();
+		char[] passwd = console.readPassword("Enter password: ");*/
+		
+		boolean login = login(username,pass);
 		if (login){
 			System.out.println("You are now logged in");
 		}
@@ -905,8 +906,8 @@ public class Program {
 	
 	
 
-	//RUN
-	public void menu() {
+	//MENU
+	private void menu() {
 		while (true) {
 			System.out.println("\nCalendar Menu \n 1. Event editor \n 2. Group editor \n 3. Your calendar \n 4. View other calendars \n 5. Log out");
 			int n = getUserInput();
@@ -980,6 +981,8 @@ public class Program {
 		}
 	}
 	
+	
+	//RUN
 	public void run() {
 		printLogin();
 		menu();
