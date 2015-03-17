@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -25,7 +26,7 @@ public class DatabaseConnection {
 			this.conn = DriverManager.getConnection(url, username, password);
 			this.stat = conn.createStatement();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("Could not connect to the database");
 		}
 	}
 	
@@ -371,8 +372,14 @@ public class DatabaseConnection {
 						}
 					}
 				}
-				Date start = Program.string2date(rse.getString("startTime"));
-				Date end = Program.string2date(rse.getString("endTime"));
+				Date start = null;
+				Date end = null;
+				try {
+					start = Program.string2date(rse.getString("startTime"));
+					end = Program.string2date(rse.getString("endTime"));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 				Event event = new Event(rse.getInt("idEvent"),
 						rse.getString("name"), start,
 						end, admin,
